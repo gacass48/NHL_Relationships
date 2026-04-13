@@ -1,0 +1,31 @@
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(xml2)
+```
+
+
+
+```{r}
+url <- "https://en.wikipedia.org/wiki/List_of_family_relations_in_the_NHL"
+
+
+tab <- read_html(url) |> 
+  html_nodes("table")
+```
+
+
+```{r}
+test1 <- tab[[1]] |> html_table()
+test1
+test2 <- tab[[2]] |> html_table()
+test2
+test3 <- tab[[3]] |> html_table()
+test3
+```
+
+
+```{r}
+test2 |> separate(col = Siblings, into = c("sib1", "sib2"), sep = ",")
+```

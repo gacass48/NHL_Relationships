@@ -1,0 +1,149 @@
+```{r}
+library(tidyverse)
+library(rvest)
+library(xml2)
+library(lubridate)
+library(hms)
+```
+
+
+```{r}
+url <- "https://www.hockey-reference.com/players/a/"
+```
+
+```{r}
+
+url2 <- "https://www.hockey-reference.com/players/a/skaters.html"
+
+
+tab <- read_html(url2) |> 
+        html_nodes("table")
+
+test1 <- tab[[1]] |> html_table(, header = FALSE)
+
+
+test1 |> slice(-1,-2) |> mutate(player = X1, 
+                                start_year = X2,
+                                end_year = X3,
+                                position = X4,
+                                GP = as.numeric(X5),
+                                G = as.numeric(X6),
+                                A = as.numeric(X7),
+                                PTS = as.numeric(X8),
+                                plus_minus = parse_double(X9),
+                                PIM = as.numeric(X10),
+                                even_str_G = as.numeric(X11),
+                                pp_G = as.numeric(X12),
+                                sh_G = as.numeric(X13),
+                                gw_G = as.numeric(X14),
+                                even_str_A = as.numeric(X15),
+                                pp_A = as.numeric(X16),
+                                sh_A = as.numeric(X17),
+                                shots_on_goal = as.numeric(X18),
+                                shooting_pct = as.numeric(X19),
+                                TOI = as.numeric(X20),
+                                ATOI = parse_time(X21),
+                                OPS = as.numeric(X22),
+                                DPS = as.numeric(X23),
+                                PS = as.numeric(X25)) |>
+                    select(player, start_year, end_year, position, GP,
+                    G, A, PTS, plus_minus, PIM, even_str_G, pp_G, sh_G, gw_G, even_str_A, pp_A, sh_A,
+                    shots_on_goal, shooting_pct, TOI, ATOI, OPS, DPS, PS) |>
+                        select(ATOI)
+
+
+```
+
+```{r}
+x <- c("player", "start_year", "end_year", "position", "GP",
+                    "G", "A", "PTS", "plus_minus", "PIM", "even_str_G", "pp_G", "sh_G", "gw_G", "even_str_A", "pp_A", "sh_A",
+                    "shots_on_goal", "shooting_pct", "TOI", "ATOI", "OPS", "DPS", "PS")
+
+skaters <- x |> as.data.frame() |> mutate(tidy = "10:00") |> 
+    pivot_wider(names_from = "x", values_from = tidy) |>
+    mutate(start_year = as.numeric(start_year),
+                                end_year = as.numeric(end_year),
+                                GP = as.numeric(GP),
+                                G = as.numeric(G),
+                                A = as.numeric(A),
+                                PTS = as.numeric(PTS),
+                                plus_minus = parse_double(plus_minus),
+                                PIM = as.numeric(PIM),
+                                even_str_G = as.numeric(even_str_G),
+                                pp_G = as.numeric(pp_G),
+                                sh_G = as.numeric(sh_G),
+                                gw_G = as.numeric(gw_G),
+                                even_str_A = as.numeric(even_str_A),
+                                pp_A = as.numeric(pp_A),
+                                sh_A = as.numeric(sh_A),
+                                shots_on_goal = as.numeric(shots_on_goal),
+                                shooting_pct = as.numeric(shooting_pct),
+                                TOI = as.numeric(TOI),
+                                ATOI = parse_time(ATOI),
+                                OPS = as.numeric(OPS),
+                                DPS = as.numeric(DPS),
+                                PS = as.numeric(PS)) |>
+                                     slice(-1) 
+
+
+```
+
+```{r}
+
+character <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
+"t", "u", "v", "w", "x", "y", "z")
+
+scrape_letters <- function(char) {
+
+    url_letter <- str_glue("https://www.hockey-reference.com/players/",char,"/skaters.html")
+
+    loop_tab <- read_html(url_letter) |> 
+    html_nodes("table")
+
+    pull_tab <- tab[[1]] |> html_table(, header = FALSE)
+
+    clean <- pull_tab |> slice(-1,-2) |> mutate(player = X1, 
+                                start_year = as.numeric(X2),
+                                end_year = as.numeric(X3),
+                                position = X4,
+                                GP = as.numeric(X5),
+                                G = as.numeric(X6),
+                                A = as.numeric(X7),
+                                PTS = as.numeric(X8),
+                                plus_minus = parse_double(X9),
+                                PIM = as.numeric(X10),
+                                even_str_G = as.numeric(X11),
+                                pp_G = as.numeric(X12),
+                                sh_G = as.numeric(X13),
+                                gw_G = as.numeric(X14),
+                                even_str_A = as.numeric(X15),
+                                pp_A = as.numeric(X16),
+                                sh_A = as.numeric(X17),
+                                shots_on_goal = as.numeric(X18),
+                                shooting_pct = as.numeric(X19),
+                                TOI = as.numeric(X20),
+                                ATOI = parse_time(X21),
+                                OPS = as.numeric(X22),
+                                DPS = as.numeric(X23),
+                                PS = as.numeric(X25)) |>
+                    select(player, start_year, end_year, position, GP,
+                    G, A, PTS, plus_minus, PIM, even_str_G, pp_G, sh_G, gw_G, even_str_A, pp_A, sh_A,
+                    shots_on_goal, shooting_pct, TOI, ATOI, OPS, DPS, PS)
+
+        return(clean)
+
+
+}
+
+```
+
+```{r}
+skaters <- map(character, scrape_letters)
+```
+
+
+```{r}
+skaters
+```
+
+
