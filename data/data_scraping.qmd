@@ -151,6 +151,10 @@ all_skaters <- bind_rows(skaters[[1]], skaters[[2]], skaters[[3]], skaters[[4]],
             skaters[[13]], skaters[[14]], skaters[[15]], skaters[[16]], skaters[[17]], skaters[[18]],
             skaters[[19]], skaters[[20]], skaters[[21]], skaters[[22]], skaters[[23]], skaters[[24]],
             skaters[[25]], skaters[[26]])
+
+all_skaters <- all_skaters |> mutate(player = str_remove(player, "\\*"))
+
+write_csv(all_skaters, "C://Users/gacas/NHL_Relationships/data/skaters.csv")
 ```
 
 

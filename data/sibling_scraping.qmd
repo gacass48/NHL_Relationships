@@ -47,7 +47,7 @@ siblings6 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
   unite("sib4", c(sib4, last4), sep = " ") |>
   unite("sib5", c(sib5, last5), sep = " ") |>
   unite("sib6", c(sib6, last6), sep = " ") |>
-  mutate(sib4 = "Brent Sutter", sib6 = "Ron Sutter")
+  mutate(sib4 = "Brent Sutter", sib6 = "Ron Sutter") |>
   select(sib1, sib2, sib3, sib4, sib5, sib6, Country)
 ```
 
@@ -108,6 +108,8 @@ siblings2 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
 
 ```{r}
 siblings_full <- bind_rows(siblings6, siblings4, siblings3, siblings2)
+
+siblings_full |> mutate(id = )
 ```
 
 
