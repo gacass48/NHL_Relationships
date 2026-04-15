@@ -4,6 +4,7 @@ library(rvest)
 library(xml2)
 library(lubridate)
 library(hms)
+library(purrr)
 ```
 
 
@@ -90,7 +91,7 @@ skaters <- x |> as.data.frame() |> mutate(tidy = "10:00") |>
 
 ```{r}
 
-character <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
+characters <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
 "t", "u", "v", "w", "x", "y", "z")
 
 scrape_letters <- function(char) {
@@ -100,7 +101,7 @@ scrape_letters <- function(char) {
     loop_tab <- read_html(url_letter) |> 
     html_nodes("table")
 
-    pull_tab <- tab[[1]] |> html_table(, header = FALSE)
+    pull_tab <- loop_tab[[1]] |> html_table(, header = FALSE)
 
     clean <- pull_tab |> slice(-1,-2) |> mutate(player = X1, 
                                 start_year = as.numeric(X2),
@@ -138,12 +139,35 @@ scrape_letters <- function(char) {
 ```
 
 ```{r}
-skaters <- map(character, scrape_letters)
+skaters <- map(characters, scrape_letters)
 ```
 
 
 ```{r}
-skaters
+
+
+all_skaters <- bind_rows(skaters[[1]], skaters[[2]], skaters[[3]], skaters[[4]], skaters[[5]], skaters[[6]],
+            skaters[[7]], skaters[[8]], skaters[[9]], skaters[[10]], skaters[[11]], skaters[[12]],
+            skaters[[13]], skaters[[14]], skaters[[15]], skaters[[16]], skaters[[17]], skaters[[18]],
+            skaters[[19]], skaters[[20]], skaters[[21]], skaters[[22]], skaters[[23]], skaters[[24]],
+            skaters[[25]], skaters[[26]])
+```
+
+
+```{r}
+sib1 <- left_join(all_skaters, siblings_full, by = join_by(player == sib1)) 
+
+sib1 |> filter(!is.na(sib2)) |>
+    select(sib2)
+```
+
+```{r}
+a_sibs1 <- left_join(a, siblings, by = join_by(player == sib1))
+a_sibs_full <- left_join(a_sibs, siblings, by = join_by(player == sib2))
+
+a_sibs_full |> mutate(Country = if_else(!is.na(Country.x),
+                                        Country.x, Country.y)) |> select(-Country.x, -Country.y) |>
+                                            select(sib1, sib2) |> filter(!is.na(sib1))
 ```
 
 

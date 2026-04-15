@@ -26,19 +26,94 @@ test3
 
 
 ```{r}
-test2 |> separate(col = Siblings, into = c("sib1", "sib2"), sep = ",") |>
-  mutate(sib2 = parse_character(sib2)) |>
-  mutate(last2 = Surname) |>
-  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*")) |>
+siblings6 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", "sib4", "sib5", "sib6"), sep = ",") |>
+  mutate(sib2 = parse_character(sib2),
+        sib3 = parse_character(sib3),
+        sib4 = parse_character(sib4),
+        sib5 = parse_character(sib5),
+        sib6 = parse_character(sib6)) |>
+  mutate(last2 = Surname,
+        last3 = Surname,
+        last4 = Surname,
+        last5 = Surname,
+        last6 = Surname) |>
+  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
+  sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib5, "\\*"),
+  sib5 = str_remove(sib5, "\\*"), sib6 = str_remove(sib6, "\\*")) |>
+  filter(!is.na(sib5)) |>
+  unite("sib1", c(sib1, Surname), sep = " ") |>
+  unite("sib2", c(sib2, last2), sep = " ") |>
+  unite("sib3", c(sib3, last3), sep = " ") |>
+  unite("sib4", c(sib4, last4), sep = " ") |>
+  unite("sib5", c(sib5, last5), sep = " ") |>
+  unite("sib6", c(sib6, last6), sep = " ") |>
+  mutate(sib4 = "Brent Sutter", sib6 = "Ron Sutter")
+  select(sib1, sib2, sib3, sib4, sib5, sib6, Country)
+```
+
+```{r}
+siblings4 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", "sib4", "sib5"), sep = ",") |>
+  mutate(sib2 = parse_character(sib2),
+        sib3 = parse_character(sib3),
+        sib4 = parse_character(sib4)) |>
+  mutate(last2 = Surname,
+        last3 = Surname,
+        last4 = Surname) |>
+  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
+  sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
+  filter(!is.na(sib4) & is.na(sib5)) |>
+  unite("sib1", c(sib1, Surname), sep = " ") |>
+  unite("sib2", c(sib2, last2), sep = " ") |>
+  unite("sib3", c(sib3, last3), sep = " ") |>
+  unite("sib4", c(sib4, last4), sep = " ") |>
+  mutate(sib1 = if_else(sib1 == "Eric Staal",
+  sib1, "Georges Boucher")) |>
+  select(sib1, sib2, sib3, sib4, Country)
+
+## Weird quotes around Eric Staal and Boucher brother
+```
+
+```{r}
+siblings3 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", "sib4", "sib5"), sep = ",") |>
+  mutate(sib2 = parse_character(sib2),
+        sib3 = parse_character(sib3),
+        sib4 = parse_character(sib4)) |>
+  mutate(last2 = Surname,
+        last3 = Surname,
+        last4 = Surname) |>
+  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
+  sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
+  filter(!is.na(sib3) & is.na(sib4)) |>
+  unite("sib1", c(sib1, Surname), sep = " ") |>
+  unite("sib2", c(sib2, last2), sep = " ") |>
+  unite("sib3", c(sib3, last3), sep = " ") |>
+  select(sib1, sib2, sib3, Country)
+```
+
+```{r}
+siblings2 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", "sib4", "sib5"), sep = ",") |>
+  mutate(sib2 = parse_character(sib2),
+        sib3 = parse_character(sib3),
+        sib4 = parse_character(sib4)) |>
+  mutate(last2 = Surname,
+        last3 = Surname,
+        last4 = Surname) |>
+  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
+  sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
+  filter(is.na(sib3)) |>
   unite("sib1", c(sib1, Surname), sep = " ") |>
   unite("sib2", c(sib2, last2), sep = " ") |>
   select(sib1, sib2, Country)
 ```
 
+```{r}
+siblings_full <- bind_rows(siblings6, siblings4, siblings3, siblings2)
+```
+
 
 ```{r}
 test3 |> 
-  separate(col = Children, into = c("child1", "child2"), sep = ",") |>
+  separate(col = Children, into = c("child1", "child2", "child3"), sep = ",") |>
   filter(!is.na(child2))
   mutate(parent = str_remove(Parent, "\\*"))
 ```
