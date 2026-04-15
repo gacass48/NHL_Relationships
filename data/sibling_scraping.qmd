@@ -3,6 +3,7 @@
 library(tidyverse)
 library(rvest)
 library(xml2)
+library(glue)
 ```
 
 
@@ -17,8 +18,6 @@ tab <- read_html(url) |>
 
 
 ```{r}
-test1 <- tab[[1]] |> html_table()
-test1
 test2 <- tab[[2]] |> html_table()
 test2
 test3 <- tab[[3]] |> html_table()
@@ -27,5 +26,19 @@ test3
 
 
 ```{r}
-test2 |> separate(col = Siblings, into = c("sib1", "sib2"), sep = ",")
+test2 |> separate(col = Siblings, into = c("sib1", "sib2"), sep = ",") |>
+  mutate(sib2 = parse_character(sib2)) |>
+  mutate(last2 = Surname) |>
+  mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*")) |>
+  unite("sib1", c(sib1, Surname), sep = " ") |>
+  unite("sib2", c(sib2, last2), sep = " ") |>
+  select(sib1, sib2, Country)
+```
+
+
+```{r}
+test3 |> 
+  separate(col = Children, into = c("child1", "child2"), sep = ",") |>
+  filter(!is.na(child2))
+  mutate(parent = str_remove(Parent, "\\*"))
 ```
