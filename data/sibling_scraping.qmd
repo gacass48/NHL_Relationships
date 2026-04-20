@@ -36,7 +36,8 @@ siblings6 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
         last3 = Surname,
         last4 = Surname,
         last5 = Surname,
-        last6 = Surname) |>
+        last6 = Surname,
+        family = Surname) |>
   mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
   sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib5, "\\*"),
   sib5 = str_remove(sib5, "\\*"), sib6 = str_remove(sib6, "\\*")) |>
@@ -48,7 +49,7 @@ siblings6 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
   unite("sib5", c(sib5, last5), sep = " ") |>
   unite("sib6", c(sib6, last6), sep = " ") |>
   mutate(sib4 = "Brent Sutter", sib6 = "Ron Sutter") |>
-  select(sib1, sib2, sib3, sib4, sib5, sib6, Country)
+  select(sib1, sib2, sib3, sib4, sib5, sib6, Country, family)
 ```
 
 ```{r}
@@ -58,7 +59,8 @@ siblings4 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
         sib4 = parse_character(sib4)) |>
   mutate(last2 = Surname,
         last3 = Surname,
-        last4 = Surname) |>
+        last4 = Surname,
+        family = Surname) |>
   mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
   sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
   filter(!is.na(sib4) & is.na(sib5)) |>
@@ -68,7 +70,7 @@ siblings4 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
   unite("sib4", c(sib4, last4), sep = " ") |>
   mutate(sib1 = if_else(sib1 == "Eric Staal",
   sib1, "Georges Boucher")) |>
-  select(sib1, sib2, sib3, sib4, Country)
+  select(sib1, sib2, sib3, sib4, Country, family)
 
 ## Weird quotes around Eric Staal and Boucher brother
 ```
@@ -80,14 +82,15 @@ siblings3 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
         sib4 = parse_character(sib4)) |>
   mutate(last2 = Surname,
         last3 = Surname,
-        last4 = Surname) |>
+        last4 = Surname,
+        family = Surname) |>
   mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
   sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
   filter(!is.na(sib3) & is.na(sib4)) |>
   unite("sib1", c(sib1, Surname), sep = " ") |>
   unite("sib2", c(sib2, last2), sep = " ") |>
   unite("sib3", c(sib3, last3), sep = " ") |>
-  select(sib1, sib2, sib3, Country)
+  select(sib1, sib2, sib3, Country, family)
 ```
 
 ```{r}
@@ -97,19 +100,26 @@ siblings2 <- test2 |> separate(col = Siblings, into = c("sib1", "sib2", "sib3", 
         sib4 = parse_character(sib4)) |>
   mutate(last2 = Surname,
         last3 = Surname,
-        last4 = Surname) |>
+        last4 = Surname,
+        family = Surname) |>
   mutate(sib1 = str_remove(sib1, "\\*"), sib2 = str_remove(sib2, "\\*"),
   sib3 = str_remove(sib3, "\\*"), sib4 = str_remove(sib4, "\\*")) |>
   filter(is.na(sib3)) |>
   unite("sib1", c(sib1, Surname), sep = " ") |>
   unite("sib2", c(sib2, last2), sep = " ") |>
-  select(sib1, sib2, Country)
+  select(sib1, sib2, Country, family)
 ```
 
 ```{r}
 siblings_full <- bind_rows(siblings6, siblings4, siblings3, siblings2)
 
-siblings_full |> mutate(id = )
+siblings_full$id <- seq.int(nrow(siblings_full))
+```
+
+```{r}
+siblings_full 
+
+write.csv(siblings_full, "C://Users/gacas/NHL_Relationships/data/siblings.csv")
 ```
 
 

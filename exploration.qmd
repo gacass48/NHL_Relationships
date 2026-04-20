@@ -1,0 +1,48 @@
+---
+Title: "Data Exploration"
+Author: "Gavin Cassidy
+format: html
+---
+
+
+```{r}
+library(tidyverse)
+library(readr)
+library(here)
+```
+
+
+
+```{r}
+skaters <- read.csv(here("data/skaters.csv"))
+```
+
+```{r}
+siblings <- read.csv(here("data/siblings.csv"))
+
+siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
+```
+
+
+
+```{r}
+skaters_wsib <- left_join(skaters, siblings_full, by = join_by(player == sibling))
+```
+
+
+
+```{r}
+has_sib <- skaters_wsib |> filter(!is.na(id))
+no_sib <- skaters_wsib |> filter(is.na(id))
+```
+
+## Plot 1
+```{r}
+g_a_sib <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A))
+
+has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A))
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point()
+```
+
