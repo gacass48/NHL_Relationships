@@ -38,11 +38,63 @@ no_sib <- skaters_wsib |> filter(is.na(id))
 
 ## Plot 1
 ```{r}
-g_a_sib <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A))
+g_a_sib <- has_sib |> group_by(family, id) |> summarise(tot_G = sum(G), tot_A = sum(A))
 
-has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A))
+top_ten <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A)) |> ungroup() |> slice(1:10)
 
 ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
-    geom_point()
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = top_ten, aes(label = family)) +
+    scale_color_viridis_c()
 ```
+
+
+```{r}
+gretzky <- skaters_wsib |> filter(family == "Gretzky") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+sutter <- skaters_wsib |> filter(family == "Sutter") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = gretzky, aes(label = player)) +
+    geom_label(data = sutter, aes(label = player)) +
+    scale_color_viridis_c()
+```
+
+
+```{r}
+arranged_skaters <- skaters_wsib |> filter(start_year <= 2000 & end_year >= 1980 & id >= 0) |> arrange(desc(PTS)) |> mutate(player = fct_reorder(player, PTS))
+
+ggplot(data = arranged_skaters, aes(x = player, y = PTS)) +
+    geom_col() +
+    geom_label(data = gretzky, aes(label = player)) +
+    coord_flip()
+```
+
+
+```{r}
+pim_sib <- has_sib |> group_by(id, family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) 
+
+top_pim <- has_sib |> group_by(family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) |> arrange(desc(tot_PIM)) |> slice(1:10)
+
+ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
+    geom_point(aes(color = tot_PIM)) +
+    geom_label(data = top_pim, aes(label = family)) +
+    scale_color_viridis_c()
+```
+
+
+```{r}
+hunter <- skaters_wsib |> filter(family == "Hunter") |> mutate(tot_GP = GP, tot_PIM = PIM)
+
+ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
+    geom_point(aes(color = tot_PIM)) +
+    geom_label(data = hunter, aes(label = player)) +
+    geom_label(data = sutter, aes(label = player)) +
+    geom_label(data = gretzky, aes(label = player)) +
+    scale_color_viridis_c()
+
+```
+
+
+
 
