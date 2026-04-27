@@ -1,0 +1,11 @@
+---
+title: "NHL Siblings"
+format: revealjs
+---
+
+## Questions of Interest
+
+Generate a doc
+theme(base_size = 24)
+
+## Subsequent slides of Graphs and Stuff

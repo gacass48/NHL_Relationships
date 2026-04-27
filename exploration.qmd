@@ -114,10 +114,7 @@ skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
     group_by(sib_ind) |> summarise(tot_a = sum(A), a_per_player = sum(A)/n())
 ```
 
-```{r}
-skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
-    group_by(sib_ind) |> summarise(tot_pts = sum(PTS), pts_per_player = sum(PTS)/n())
-```
+
 
 ```{r}
 skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
@@ -133,7 +130,7 @@ skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
 
 ```{r}
 skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
-    group_by(sib_ind) |> summarise(tot_GP = sum(GP), GP_per_player = sum(GP)/n())
+    group_by(sib_ind) |> filter(!is.na(plus_minus)) |> filter(!is.na(PIM)) |> summarise(tot_GP = sum(GP), GP_per_player = sum(GP)/n())
 ```
 
 ```{r}
@@ -144,4 +141,73 @@ skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
 ```{r}
 skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
     group_by(sib_ind) |> filter(!is.na(shots_on_goal)) |> summarise(tot_sog = sum(shots_on_goal), sog_per_player = sum(shots_on_goal)/n())
+```
+
+
+
+```{r}
+sib_comp <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |>
+    summarise(size = n(),
+    tot_g = sum(G), 
+    tot_a = sum(A), 
+    tot_pts = sum(PTS),
+    tot_pm = sum(plus_minus)
+    ) |>
+        pivot_longer(cols = c(size, tot_g, tot_a, tot_pts, tot_pm))
+```
+
+
+
+```{r}
+ggplot(data = sib_comp, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge")
+```
+
+
+```{r}
+sib_comp_per_player <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise(GP_per_player = sum(GP)/n(),
+    g_per_player = sum(G)/n(), 
+    a_per_player = sum(A)/n(), 
+    pts_per_player = sum(PTS)/n(),
+    PIM_per_player = sum(PIM)/n(),
+    pm_per_player = sum(plus_minus)/n()
+    ) |>
+        pivot_longer(cols = c(GP_per_player, g_per_player, a_per_player, pts_per_player, PIM_per_player, pm_per_player))
+```
+
+
+```{r}
+ggplot(data = sib_comp_per_player, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge")
+```
+
+
+
+```{r}
+sib_comp_per_game <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise(g_per_game = sum(G)/sum(GP), 
+    a_per_game = sum(A)/sum(GP), 
+    pts_per_game = sum(PTS)/sum(GP),
+    PIM_per_game = sum(PIM)/sum(GP),
+    pm_per_game = sum(plus_minus)/sum(GP)
+    ) |>
+        pivot_longer(cols = c(g_per_game, a_per_game, pts_per_game, PIM_per_game, pm_per_game))
+```
+
+
+
+```{r}
+ggplot(data = sib_comp_per_game, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge")
+```
+
+
+```{r}
+skaters_wsib |> filter(!is.na(id) & id != 316 & id != 19 & id != 17 & id != 141 & id != 296) |> group_by(id, family) |> summarise(start = min(start_year), start2 = max(start_year)) |> mutate(gap = start2 - start) |> arrange(desc(gap))
+
+skaters_wsib |> filter(id == 296)
 ```
