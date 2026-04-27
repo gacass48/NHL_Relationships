@@ -96,5 +96,52 @@ ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
 ```
 
 
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(size = n())
+
+## no sib 7276
+## sib 622
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(tot_g = sum(G), g_per_player = sum(G)/n())
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(tot_a = sum(A), a_per_player = sum(A)/n())
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(tot_pts = sum(PTS), pts_per_player = sum(PTS)/n())
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(tot_pts = sum(PTS), pts_per_player = sum(PTS)/n())
+```
 
 
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> summarise(tot_PIM = sum(PIM), PIM_per_player = sum(PIM)/n())
+```
+
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> summarise(tot_GP = sum(GP), GP_per_player = sum(GP)/n())
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> filter(!is.na(plus_minus)) |> summarise(tot_pm = sum(plus_minus), pm_per_player = sum(plus_minus)/n())
+```
+
+```{r}
+skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), 1, 0)) |>
+    group_by(sib_ind) |> filter(!is.na(shots_on_goal)) |> summarise(tot_sog = sum(shots_on_goal), sog_per_player = sum(shots_on_goal)/n())
+```
