@@ -1,0 +1,13 @@
+---
+title: "Final Report"
+author: "Gavin Cassidy"
+format: html
+---
+
+## Abstract
+
+Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends 
+
+
+
+## Introduction

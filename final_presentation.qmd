@@ -3,9 +3,160 @@ title: "NHL Siblings"
 format: revealjs
 ---
 
+```{r}
+library(tidyverse)
+library(readr)
+library(here)
+```
+
+```{r}
+skaters <- read.csv(here("data/skaters.csv"))
+```
+
+```{r}
+siblings <- read.csv(here("data/siblings.csv"))
+
+siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
+```
+
+```{r}
+skaters_wsib <- left_join(skaters, siblings_full, by = join_by(player == sibling))
+```
+
+```{r}
+has_sib <- skaters_wsib |> filter(!is.na(id))
+no_sib <- skaters_wsib |> filter(is.na(id))
+```
+
+
 ## Questions of Interest
 
-Generate a doc
-theme(base_size = 24)
+Who are the best siblings, look at sibling pairs to see who has the most goals, assists, points, ect.
 
-## Subsequent slides of Graphs and Stuff
+Are NHL players with siblings better or worse than players without siblings?
+
+## Who are the best siblings
+
+```{r}
+g_a_sib <- has_sib |> group_by(family, id) |> summarise(tot_G = sum(G), tot_A = sum(A))
+
+top_ten <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A)) |> ungroup() |> slice(1:10)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = top_ten, aes(label = family)) +
+    scale_color_viridis_c() +
+    labs(title = "Siblings with the Most Goals and Assists") +
+    theme_minimal(base_size = 15)
+```
+
+## Prominent Families
+
+```{r}
+gretzky <- skaters_wsib |> filter(family == "Gretzky") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+sutter <- skaters_wsib |> filter(family == "Sutter") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = gretzky, aes(label = player)) +
+    geom_label(data = sutter, aes(label = player)) +
+    scale_color_viridis_c() +
+    theme_minimal(base_size = 15) +
+    labs(title = "Gretzky and Sutter Siblings")
+```
+
+## Siblings vs Non-Siblings Total
+
+```{r}
+sib_comp <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |>
+    summarise(size = n(),
+    tot_g = sum(G), 
+    tot_a = sum(A), 
+    tot_pts = sum(PTS),
+    tot_pm = sum(plus_minus)
+    ) |>
+        pivot_longer(cols = c(size, tot_g, tot_a, tot_pts, tot_pm))
+```
+
+```{r}
+ggplot(data = sib_comp, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    labs(caption = "~7000 without siblings vs ~600 with sibling") +
+    theme_minimal(base_size = 15)
+```
+
+## Siblings vs Non-Siblings per Player
+
+```{r}
+sib_comp_per_player <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise(GP_per_player = sum(GP)/n(),
+    g_per_player = sum(G)/n(), 
+    a_per_player = sum(A)/n(), 
+    pts_per_player = sum(PTS)/n(),
+    PIM_per_player = sum(PIM)/n(),
+    pm_per_player = sum(plus_minus)/n()
+    ) |>
+        pivot_longer(cols = c(GP_per_player, g_per_player, a_per_player, pts_per_player, PIM_per_player, pm_per_player))
+```
+
+```{r}
+ggplot(data = sib_comp_per_player, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    labs(title = "Stats per Player, Sibling vs. No Sibling") +
+    theme_minimal(base_size = 15)
+
+```
+
+## Siblings vs Non-Siblings per Game
+
+```{r}
+sib_comp_per_game <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise(g_per_game = sum(G)/sum(GP), 
+    a_per_game = sum(A)/sum(GP), 
+    pts_per_game = sum(PTS)/sum(GP),
+    PIM_per_game = sum(PIM)/sum(GP),
+    pm_per_game = sum(plus_minus)/sum(GP)
+    ) |>
+        pivot_longer(cols = c(g_per_game, a_per_game, pts_per_game, PIM_per_game, pm_per_game))
+```
+
+```{r}
+ggplot(data = sib_comp_per_game, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    labs(title = "Stats per game, Sibling vs. No Sibling") +
+    theme_minimal(base_size = 15)
+```
+
+
+## New Questions
+
+Noticing people have the same names, what pairs are most successful?
+
+Are those pairs related or not?
+
+
+## Same name
+
+```{r}
+same_name <- skaters |> group_by(player) |> mutate(size = n()) |> filter(size > 1) |>
+    mutate(plus_minus = if_else(!is.na(plus_minus), plus_minus, 0, 0)) |>
+    summarise(G = sum(G), A = sum(A), GP = sum(GP), PTS = sum(PTS), 
+    plus_minus = sum(plus_minus), PIM = sum(PIM))
+
+```
+
+```{r}
+same_name_topg <- same_name |> arrange(desc(G)) |> slice(1:10)
+```
+
+```{r}
+ggplot(data = same_name, aes(x = GP, y = G)) +
+    geom_point(aes(color = G)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_topg, aes(label = player)) +
+    labs(title = "Players with the same name") +
+    theme_minimal()
+```

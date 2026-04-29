@@ -23,6 +23,10 @@ siblings <- read.csv(here("data/siblings.csv"))
 siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
 ```
 
+```{r}
+parents <- read.csv(here("data/parent.csv"))
+```
+
 
 
 ```{r}
@@ -210,4 +214,60 @@ ggplot(data = sib_comp_per_game, aes(x = name, y = value, fill = sib_ind)) +
 skaters_wsib |> filter(!is.na(id) & id != 316 & id != 19 & id != 17 & id != 141 & id != 296) |> group_by(id, family) |> summarise(start = min(start_year), start2 = max(start_year)) |> mutate(gap = start2 - start) |> arrange(desc(gap))
 
 skaters_wsib |> filter(id == 296)
+```
+
+
+```{r}
+same_name <- skaters |> group_by(player) |> mutate(size = n()) |> filter(size > 1) |>
+    mutate(plus_minus = if_else(!is.na(plus_minus), plus_minus, 0, 0)) |>
+    summarise(G = sum(G), A = sum(A), GP = sum(GP), PTS = sum(PTS), 
+    plus_minus = sum(plus_minus), PIM = sum(PIM))
+
+```
+
+```{r}
+same_name_topg <- same_name |> arrange(desc(G)) |> slice(1:10)
+```
+
+```{r}
+ggplot(data = same_name, aes(x = GP, y = G)) +
+    geom_point(aes(color = G)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_topg, aes(label = player))
+```
+
+
+```{r}
+same_name_topa <- same_name |> arrange(desc(A)) |> slice(1:10)
+```
+
+```{r}
+ggplot(data = same_name, aes(x = GP, y = A)) +
+    geom_point(aes(color = A)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_topa, aes(label = player))
+```
+
+
+```{r}
+same_name_toppts <- same_name |> arrange(desc(PTS)) |> slice(1:10)
+```
+
+```{r}
+ggplot(data = same_name, aes(x = GP, y = PTS)) +
+    geom_point(aes(color = PTS)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_toppts, aes(label = player))
+```
+
+
+```{r}
+same_name_toppim <- same_name |> arrange(desc(PIM)) |> slice(1:10)
+```
+
+```{r}
+ggplot(data = same_name, aes(x = GP, y = PIM)) +
+    geom_point(aes(color = PIM)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_toppim, aes(label = player))
 ```
