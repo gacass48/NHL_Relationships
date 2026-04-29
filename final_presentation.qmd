@@ -35,6 +35,13 @@ Who are the best siblings, look at sibling pairs to see who has the most goals, 
 
 Are NHL players with siblings better or worse than players without siblings?
 
+
+## DATA
+
+```{r}
+skaters_wsib |> filter(id <= 2) |> slice(1:5)
+```
+
 ## Who are the best siblings
 
 ```{r}
