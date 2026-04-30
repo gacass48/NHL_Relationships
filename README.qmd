@@ -7,7 +7,7 @@ format: gfm
 
 ### Questions
 
-### Summary
+### Graph Title
 
 
 ```{r}

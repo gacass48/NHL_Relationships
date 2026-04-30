@@ -2,12 +2,16 @@
 title: "Final Report"
 author: "Gavin Cassidy"
 format: html
+embed-resources: true
 ---
 
 ## Abstract
 
-Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends 
-
+Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends between players with and without siblings. Is there a genetic or environmental advantage in certain families, or are NHL players without siblings better? 
 
 
 ## Introduction
+
+The modern NHL has some dynamic sibling pairs that have found themselves in the spotlight in recent history, with the Hughes brothers and Tkachuk brothers excelling during the USA Olympic victory and for their respective NHL teams. With this in mind, we decided to look into who are the best siblings in NHL history, and look deeper at those individuals. We will also look into if NHL players with siblings are better or worse than players without siblings? Siblings often compete with one another, and push eachother to be better, so will one brother motivate others to make the NHL.
+
+For this project there are 2 data sets. First we used skater data scraped from Hockey Reference which has a complete list of all skaters in NHL history, goalies are not included as they have a different skillset and statistical profile. This data set has 7898 rows and 24 columns, each row representing a player and their career statistics. This data set holds player information dating back to 1918 so the data set is not fully complete, with not all statistics collected for the entire history of the NHL. For instance, advanced statistics like plus minus, time on ice, or even strength goals are not collected for the early years of players. The other data set used is scraped from Wikipedia and is a list of all all siblings who have played in the NHL with an ID to determine which set of siblings each player belongs to. This data set has 711 rows and 5 columns, with each row containing 1 player from each set of siblings, along with the family name, id, and country of orgin for some players. 
