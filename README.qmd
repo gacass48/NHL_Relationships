@@ -1,6 +1,7 @@
 ---
-title: "Untitled"
+title: "NHL Relationship Overview"
 format: gfm
+embed-resources: true
 ---
 
 ### Data
@@ -16,17 +17,102 @@ PIM: Penalty Minutes</br>
 pm: Plus Minus = Team Goals Scored while on ice - Goals against while on ice</br>
 GP: Game Played</br>
 
+```{r}
+#| warning: false
+#| output: false
+#| echo: false
+library(tidyverse)
+library(readr)
+library(here)
+
+skaters <- read.csv(here("data/skaters.csv"))
+
+siblings <- read.csv(here("data/siblings.csv"))
+
+siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
+
+skaters_wsib <- left_join(skaters, siblings_full, by = join_by(player == sibling))
+
+has_sib <- skaters_wsib |> filter(!is.na(id))
+no_sib <- skaters_wsib |> filter(is.na(id))
+```
+
+```{r}
+has_sib |> slice(1, 15)
+```
+
 ### Questions
+
+Some of the questions we hope to answer in this project are:
 
 What Siblings are the most succesful in NHL history? The most violent?
 
 Are players with sibling in the NHL more successful than players without?
 
+From answering these questions we discovered a trend of players with the exact same name and decided to explore another question,
+
 What is the best pair of players with the exact same name?
 
-### Graph Title
-
+### Best NHL Siblings
 
 ```{r}
+#| warning: false
+#| echo: false
+g_a_sib <- has_sib |> group_by(family, id) |> summarise(tot_G = sum(G), tot_A = sum(A))
 
+top_ten <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A)) |> ungroup() |> slice(1:10)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = top_ten, aes(label = family)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(x = "Total Goals", y = "Total Assists",
+    title = "Sibling Pair's Total Goals and Assists", 
+    color = "Total Goals")
+```
+
+### Per Player Siblings vs. Non-Siblings
+
+```{r}
+#| warning: false
+#| echo: false
+sib_comp_per_player <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise("Games Played" = sum(GP)/n(),
+    Goals = sum(G)/n(), 
+    Assists = sum(A)/n(), 
+    Points = sum(PTS)/n(),
+    PIM = sum(PIM)/n(),
+    "Plus Minus" = sum(plus_minus)/n()
+    ) |>
+        pivot_longer(cols = c(`Games Played`, Goals, Assists, Points, PIM, `Plus Minus`))
+
+ggplot(data = sib_comp_per_player, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    theme_minimal() +
+    labs(x = "Statistic", y = "Count Per Player", fill = "Sibling Status",
+    title = "Comparing Siblings vs Non-Siblings by averaging per-player Statistics")
+```
+
+
+### Players with the Same Name
+
+```{r}
+#| warning: false
+#| echo: false
+same_name <- skaters |> group_by(player) |> mutate(size = n()) |> filter(size > 1) |>
+    mutate(plus_minus = if_else(!is.na(plus_minus), plus_minus, 0, 0)) |>
+    summarise(G = sum(G), A = sum(A), GP = sum(GP), PTS = sum(PTS), 
+    plus_minus = sum(plus_minus), PIM = sum(PIM))
+
+same_name_topg <- same_name |> arrange(desc(G)) |> slice(1:10)
+
+ggplot(data = same_name, aes(x = GP, y = G)) +
+    geom_point(aes(color = G)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_topg, aes(label = player)) +
+    theme_minimal() +
+    labs(x = "Games Played", y = "Goals", 
+    color = "Goals", title = "Goals Scored by Pairs with the Same Name")
 ```
