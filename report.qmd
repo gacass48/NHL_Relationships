@@ -4,10 +4,29 @@ author: "Gavin Cassidy"
 format: html
 embed-resources: true
 ---
+```{r}
+#| warning: false
+#| output: false
+#| echo: false
+library(tidyverse)
+library(readr)
+library(here)
+
+skaters <- read.csv(here("data/skaters.csv"))
+
+siblings <- read.csv(here("data/siblings.csv"))
+
+siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
+
+skaters_wsib <- left_join(skaters, siblings_full, by = join_by(player == sibling))
+
+has_sib <- skaters_wsib |> filter(!is.na(id))
+no_sib <- skaters_wsib |> filter(is.na(id))
+```
 
 ## Abstract
 
-Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends between players with and without siblings. Is there a genetic or environmental advantage in certain families, or are NHL players without siblings better? 
+Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends between players with and without siblings. Is there a genetic or environmental advantage in certain families, or are NHL players without siblings better? We will combine a data set of all NHL skaters with a list of NHL siblings to find the best pairs and see if having a sibling is an advantage.
 
 
 ## Introduction
@@ -15,3 +34,94 @@ Interested in family relationships in the NHL? Which families are the most succe
 The modern NHL has some dynamic sibling pairs that have found themselves in the spotlight in recent history, with the Hughes brothers and Tkachuk brothers excelling during the USA Olympic victory and for their respective NHL teams. With this in mind, we decided to look into who are the best siblings in NHL history, and look deeper at those individuals. We will also look into if NHL players with siblings are better or worse than players without siblings? Siblings often compete with one another, and push eachother to be better, so will one brother motivate others to make the NHL.
 
 For this project there are 2 data sets. First we used skater data scraped from Hockey Reference which has a complete list of all skaters in NHL history, goalies are not included as they have a different skillset and statistical profile. This data set has 7898 rows and 24 columns, each row representing a player and their career statistics. This data set holds player information dating back to 1918 so the data set is not fully complete, with not all statistics collected for the entire history of the NHL. For instance, advanced statistics like plus minus, time on ice, or even strength goals are not collected for the early years of players. The other data set used is scraped from Wikipedia and is a list of all all siblings who have played in the NHL with an ID to determine which set of siblings each player belongs to. This data set has 711 rows and 5 columns, with each row containing 1 player from each set of siblings, along with the family name, id, and country of orgin for some players. 
+
+To combine the data sets we do a left join which keeps all of the rows from our skater data while adding columns with family name and id for players who are in the sibling data. There are a few players who have the exact same name as others, especially fathers/sons, but for our most successful sibling pairs this is not an issue. Because of how the data is stored on our skater list, we cannot look at trends with fathers/sons as I initially planned because the jr. and sr. prefixes are not included in names. This contributes to skaters with the exact same names, which raises a new question, what players with the exact same name have found the most success. For example, there are 2 players named Sebastian Aho who are not related at all, and they will be compared to all other players who have the exact same name as another player. These are some of the trends and coincidences we will explore.
+
+
+## Which siblings are the most successful?
+
+```{r}
+#| warning: false
+#| echo: false
+g_a_sib <- has_sib |> group_by(family, id) |> summarise(tot_G = sum(G), tot_A = sum(A))
+
+top_ten <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A)) |> ungroup() |> slice(1:10)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = top_ten, aes(label = family)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(x = "Total Goals", y = "Total Assists",
+    title = "Sibling Pair's Total Goals and Assists", 
+    color = "Total Goals")
+```
+
+This plot shows the most successful sibling pairs in NHL history in terms of goals and assists. We can see that while there are a lot of sibling pairs that have acheived impressive careers, the Sutter and Gretzky siblings clearly stand above the rest. Both of these families have impressive careers rivaling some of the best individuals in NHL history.
+
+
+## Gretzky and Sutter Siblings
+
+```{r}
+#| warning: false
+#| echo: false
+gretzky <- skaters_wsib |> filter(family == "Gretzky") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+sutter <- skaters_wsib |> filter(family == "Sutter") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
+
+ggplot(data = g_a_sib, aes(x = tot_G, y = tot_A)) +
+    geom_point(aes(color = tot_G)) +
+    geom_label(data = gretzky, aes(label = player)) +
+    geom_label(data = sutter, aes(label = player)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(x = "Total goals", y = "Total Goals",
+    title = "Sutter and Gretzky Family Total Goals and Assists",
+    color = "Total Goals")
+```
+
+
+From this plot we can see that these two families have very different collections of careers with the Sutters putting 6 siblings in the NHL, while the Gretzky family only has 2. Many hockey fans will recognize the name Wayne Gretzky, owing to his record number of Assists and Points and nickname of "The Great One", but less will recognize his brother Brent Gretzky in the bottom left of our plot. Brent played 13 games with in the NHL, totaling 4 PTS, while Wayne carries the pair with 2857 PTS. The Sutters have 6 siblings, all of whom played at least 400 games, and totaling immense numbers of goals and assists.
+
+## Most Penalty Minutes
+
+```{r}
+#| warning: false
+#| echo: false
+pim_sib <- has_sib |> group_by(id, family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) 
+
+top_pim <- has_sib |> group_by(family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) |> arrange(desc(tot_PIM)) |> slice(1:10)
+
+ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
+    geom_point(aes(color = tot_PIM)) +
+    geom_label(data = top_pim, aes(label = family)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(x = "Total Games Played",
+    y = "Total Penalty Minutes",
+    title = "Siblings with the Most Penalty Minutes",
+    color = "Total Penalty Minutes")
+```
+
+This plot shows another side of siblings, instead of goals and assists we are looking at Penalty Minutes. In Hockey, most penaltys are 2 minutes, while the more violent miscondut like fighting is 10 minutes. This means to accumulate more penalty minutes, players will tend to get in fights, as well as accumulating lots of other penalties. Here we can see the the Hunter brothers have an impressive amount of penalty minutes considering their number of games player, while the Sutter brothers have a crazy number of games played and penalty minutes.
+
+## Which of these siblings is the most violent?
+
+```{r}
+#| warning: false
+#| echo: false
+hunter <- skaters_wsib |> filter(family == "Hunter") |> mutate(tot_GP = GP, tot_PIM = PIM)
+
+ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
+    geom_point(aes(color = tot_PIM)) +
+    geom_label(data = hunter, aes(label = player)) +
+    geom_label(data = sutter, aes(label = player)) +
+    geom_label(data = gretzky, aes(label = player)) +
+    scale_color_viridis_c() +
+    labs(x = "Total Games Played",
+    y = "Total Penalty Minutes",
+    color = "Total Penalty Minutes",
+    title = "Sutter, Hunter, and Gretzky Brothers Penalty Minutes")
+```
+
+On this plot we can see that Dale Hunter is far more violent than the rest of the brothers on this list, 
+

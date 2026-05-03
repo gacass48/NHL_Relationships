@@ -25,10 +25,6 @@ siblings <- read.csv(here("data/siblings.csv"))
 siblings_full <- siblings |> pivot_longer(cols = c(sib1, sib2, sib3, sib4, sib5, sib6), names_to = "sib", values_to = "sibling", values_drop_na = TRUE)
 ```
 
-```{r}
-parents <- read.csv(here("data/parent.csv"))
-```
-
 
 
 ```{r}
