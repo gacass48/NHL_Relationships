@@ -1,5 +1,5 @@
 ---
-title: "Final Report"
+title: "NHL Siblings Final Report"
 author: "Gavin Cassidy"
 format: html
 embed-resources: true
@@ -34,6 +34,15 @@ Interested in family relationships in the NHL? Which families are the most succe
 The modern NHL has some dynamic sibling pairs that have found themselves in the spotlight in recent history, with the Hughes brothers and Tkachuk brothers excelling during the USA Olympic victory and for their respective NHL teams. With this in mind, we decided to look into who are the best siblings in NHL history, and look deeper at those individuals. We will also look into if NHL players with siblings are better or worse than players without siblings? Siblings often compete with one another, and push eachother to be better, so will one brother motivate others to make the NHL.
 
 For this project there are 2 data sets. First we used skater data scraped from Hockey Reference which has a complete list of all skaters in NHL history, goalies are not included as they have a different skillset and statistical profile. This data set has 7898 rows and 24 columns, each row representing a player and their career statistics. This data set holds player information dating back to 1918 so the data set is not fully complete, with not all statistics collected for the entire history of the NHL. For instance, advanced statistics like plus minus, time on ice, or even strength goals are not collected for the early years of players. The other data set used is scraped from Wikipedia and is a list of all all siblings who have played in the NHL with an ID to determine which set of siblings each player belongs to. This data set has 711 rows and 5 columns, with each row containing 1 player from each set of siblings, along with the family name, id, and country of orgin for some players. 
+
+NHL Statistic Descriptions:
+
+G: Goals Scored</br>
+A: Assists</br>
+PTS: Points = Goals + Assists</br>
+PIM: Penalty Minutes</br>
+pm: Plus Minus = Team Goals Scored while on ice - Goals against while on ice</br>
+GP: Game Played</br>
 
 To combine the data sets we do a left join which keeps all of the rows from our skater data while adding columns with family name and id for players who are in the sibling data. There are a few players who have the exact same name as others, especially fathers/sons, but for our most successful sibling pairs this is not an issue. Because of how the data is stored on our skater list, we cannot look at trends with fathers/sons as I initially planned because the jr. and sr. prefixes are not included in names. This contributes to skaters with the exact same names, which raises a new question, what players with the exact same name have found the most success. For example, there are 2 players named Sebastian Aho who are not related at all, and they will be compared to all other players who have the exact same name as another player. These are some of the trends and coincidences we will explore.
 
@@ -117,11 +126,113 @@ ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
     geom_label(data = sutter, aes(label = player)) +
     geom_label(data = gretzky, aes(label = player)) +
     scale_color_viridis_c() +
+    theme_minimal() +
     labs(x = "Total Games Played",
     y = "Total Penalty Minutes",
     color = "Total Penalty Minutes",
     title = "Sutter, Hunter, and Gretzky Brothers Penalty Minutes")
 ```
 
-On this plot we can see that Dale Hunter is far more violent than the rest of the brothers on this list, 
+On this plot we can see that Dale Hunter's brothers must have had a tough time growing up, with him contributing by far the most penalty minutes. The Sutter brothers also all produce a solid number of penalty minutes, and are overwhelming in their numbers, I feel for their parents who undoubtedly broke up a good amount of roughhousing. The Wayne Gretzky shows that he was more artful than violent on the ice, accumulating significantly less penalty minutes than players with the same number of games.
 
+## Per-Player Siblings vs. Non-Siblings Statistics
+
+```{r}
+#| warning: false
+#| echo: false
+sib_comp_per_player <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise("Games Played" = sum(GP)/n(),
+    Goals = sum(G)/n(), 
+    Assists = sum(A)/n(), 
+    Points = sum(PTS)/n(),
+    PIM = sum(PIM)/n(),
+    "Plus Minus" = sum(plus_minus)/n()
+    ) |>
+        pivot_longer(cols = c(`Games Played`, Goals, Assists, Points, PIM, `Plus Minus`))
+
+ggplot(data = sib_comp_per_player, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    theme_minimal() +
+    labs(x = "Statistic", y = "Count Per Player", fill = "Sibling Status",
+    title = "Comparing Siblings vs Non-Siblings by averaging per-player Statistics")
+```
+
+This plot shows an overall comparison between players with and without siblings in the NHL, observing Statistics per-player. This plot represents 6318 players without siblings, and 520 players with siblings. Each bar represents the average statistics per-player for someone with or without a sibling. We can see that players with siblings play almost 100 more games, and outperform in all other satistics. A longer career usually indicates a better career, but also contributes to higher goal, assist, and point counts. We will now look at per-game statistics to adjust for longer careers.
+
+
+## Per-Game Siblings vs. Non-Siblings Statistics
+
+```{r}
+#| warning: false
+#| echo: false
+sib_comp_per_game <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
+    group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
+    summarise(Goals = sum(G)/sum(GP), 
+    Assists = sum(A)/sum(GP), 
+    Points = sum(PTS)/sum(GP),
+    PIM = sum(PIM)/sum(GP),
+    ) |>
+        pivot_longer(cols = c(Goals, Assists, Points, PIM))
+
+ggplot(data = sib_comp_per_game, aes(x = name, y = value, fill = sib_ind)) +
+    geom_col(position = "dodge") +
+    theme_minimal() +
+    labs(x = "Statistic", y = "Per-Game Statistics",
+    fill = "Sibling Status",
+    title = "Comparing Siblings vs. Non-Siblings with per-game Statistics")
+```
+
+This plot shows how well siblings vs. non-siblings perform per-game on average. We can see that players with NHL siblings are better in Goals, Assists, and Points per game, showing that they produce more than players without siblings in the NHL. This and our previous plot tell us that players with siblings in the NHL are better than players without NHL siblings and tend to have longer careers.
+
+
+
+## Players with the same name
+
+During this project I stumbled on a collection of players who had the exact same name as other NHL players. Some of these are father-son pairs, with Jr. and Sr. prefixes not featured on Hockey Reference, while others just coincedentally have the same exact names. This next section will see which pair of players with the same name has been the most successful. 
+
+
+```{r}
+#| warning: false
+#| echo: false
+same_name <- skaters |> group_by(player) |> mutate(size = n()) |> filter(size > 1) |>
+    mutate(plus_minus = if_else(!is.na(plus_minus), plus_minus, 0, 0)) |>
+    summarise(G = sum(G), A = sum(A), GP = sum(GP), PTS = sum(PTS), 
+    plus_minus = sum(plus_minus), PIM = sum(PIM))
+
+same_name_topg <- same_name |> arrange(desc(G)) |> slice(1:10)
+
+ggplot(data = same_name, aes(x = GP, y = G)) +
+    geom_point(aes(color = G)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_topg, aes(label = player)) +
+    theme_minimal() +
+    labs(x = "Games Played", y = "Goals", 
+    color = "Goals", title = "Goals Scored by Pairs with the Same Name")
+```
+
+This plot shows the top performing pairs of people who have the same exact name. We see players like Syl Apps Sr. and Jr., the former which was one of the greatest Centers of all time. His son would later go on to play and have a solid NHL career as well. This is contrasted with players like Sebastian Aho, with 2 players from the 2000s-2010s and coming from different countries (Sweden and Finland). The top scoring pair, Greg Adams and Greg Adams, played 10 years apart and had no relation beside the same name. It was interesting to see a number of players who had no relation with solid success in the NHL.
+
+## Most Violent Players with the same name
+
+```{r}
+#| warning: false
+#| echo: false
+same_name_toppim <- same_name |> arrange(desc(PIM)) |> slice(1:10)
+
+ggplot(data = same_name, aes(x = GP, y = PIM)) +
+    geom_point(aes(color = PIM)) +
+    scale_color_viridis_c() +
+    geom_label(data = same_name_toppim, aes(label = player)) +
+    labs(x = "Games Player", y = "Penalty Minutes", color = "Penalty Minutes",
+    title = "Penalty Minutes for Players with the Same Name")
+```
+
+Steve Smith and Steve Smith are the most violent pair, and while not related they have over 2000 Penalty Minutes combined. However, 1 of the two only played 17 games and has less than 20 PIM. The list features other known enforcers like Mike Peluso, Steve Smith, and Bob Kelley. I was hoping that violence would run in the family for some Jr. and Sr. pairs, but it appears that most of our top name sharing partners are unrelated.
+
+
+## Conclusion
+
+From this project, we discovered that players with siblings in the NHL tend to be stronger players, with more production and longer careers. This indicates that having a sibling is an advantage, either by bringing a higher level of competition earlier, or shows that certain families have better genetics or nuture athletes in a better way. We can also see certain families that thrived in the NHL, like Sutters. There were interesting trends, with Wayne Gretzky contributing enough production for 2 careers, and Dale Hunter showing his violent tendincies. Discovering the trends of players with the same names was also interesting with a lot less father-son combinations than I expected. In the future, I would love to see trends between father-son pairs, but the format of hockey reference names makes it impossible to distinguish between the names, as the suffixes are not included. This was a challenge I encountered while exploring data. Some limitiations in the visualization are that most of the points are anonymous, with too many names being difficult to visualize and a dynamic visualization making the reader's experience unknown.
+
+Ideally there would be an app to visualize different combinations of statistics with optional labeling and a hover to display names if desired. More time would make this doable. 

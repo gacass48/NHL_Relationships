@@ -5,7 +5,24 @@ format: gfm
 
 ### Data
 
+For this project there are 2 data sets. First we used skater data scraped from Hockey Reference which has a complete list of all skaters in NHL history, goalies are not included as they have a different skillset and statistical profile. This data set has 7898 rows and 24 columns, each row representing a player and their career statistics. This data set holds player information dating back to 1918 so the data set is not fully complete, with not all statistics collected for the entire history of the NHL. For instance, advanced statistics like plus minus, time on ice, or even strength goals are not collected for the early years of players. The other data set used is scraped from Wikipedia and is a list of all all siblings who have played in the NHL with an ID to determine which set of siblings each player belongs to. This data set has 711 rows and 5 columns, with each row containing 1 player from each set of siblings, along with the family name, id, and country of orgin for some players. 
+
+NHL Statistic Descriptions:
+
+G: Goals Scored</br>
+A: Assists</br>
+PTS: Points = Goals + Assists</br>
+PIM: Penalty Minutes</br>
+pm: Plus Minus = Team Goals Scored while on ice - Goals against while on ice</br>
+GP: Game Played</br>
+
 ### Questions
+
+What Siblings are the most succesful in NHL history? The most violent?
+
+Are players with sibling in the NHL more successful than players without?
+
+What is the best pair of players with the exact same name?
 
 ### Graph Title
 
