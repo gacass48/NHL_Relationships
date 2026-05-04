@@ -51,12 +51,12 @@ What is the best pair of players with the exact same name?
 
 ### Best NHL Siblings
 
-![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
+![](best_sib.png)
 
 ### Per Player Siblings vs. Non-Siblings
 
-![](README_files/figure-commonmark/unnamed-chunk-4-1.png)
+![](sib_non.png)
 
 ### Players with the Same Name
 
-![](README_files/figure-commonmark/unnamed-chunk-5-1.png)
+![](name.png)
