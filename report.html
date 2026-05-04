@@ -21,6 +21,41 @@ ul.task-list li input[type="checkbox"] {
 width: 0.8em;
 margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 }
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+}
+pre.numberSource { margin-left: 3em; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -2196,6 +2231,22 @@ vertical-align: -.125em;
 </header>
 
 
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>skaters <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">&quot;data/skaters.csv&quot;</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>siblings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">&quot;data/siblings.csv&quot;</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>siblings_full <span class="ot">&lt;-</span> siblings <span class="sc">|&gt;</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(sib1, sib2, sib3, sib4, sib5, sib6), <span class="at">names_to =</span> <span class="st">&quot;sib&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;sibling&quot;</span>, <span class="at">values_drop_na =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>skaters_wsib <span class="ot">&lt;-</span> <span class="fu">left_join</span>(skaters, siblings_full, <span class="at">by =</span> <span class="fu">join_by</span>(player <span class="sc">==</span> sibling))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>has_sib <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>no_sib <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(id))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
 <p>Interested in family relationships in the NHL? Which families are the most successful? This project explores sibling pairs that are the most successful in NHL history and looks for interesting trends between players with and without siblings. Is there a genetic or environmental advantage in certain families, or are NHL players without siblings better? We will combine a data set of all NHL skaters with a list of NHL siblings to find the best pairs and see if having a sibling is an advantage.</p>
@@ -2207,10 +2258,39 @@ vertical-align: -.125em;
 <p>NHL Statistic Descriptions:</p>
 <p>G: Goals Scored<br> A: Assists<br> PTS: Points = Goals + Assists<br> PIM: Penalty Minutes<br> pm: Plus Minus = Team Goals Scored while on ice - Goals against while on ice<br> GP: Game Played<br></p>
 <p>To combine the data sets we do a left join which keeps all of the rows from our skater data while adding columns with family name and id for players who are in the sibling data. There are a few players who have the exact same name as others, especially fathers/sons, but for our most successful sibling pairs this is not an issue. Because of how the data is stored on our skater list, we cannot look at trends with fathers/sons as I initially planned because the jr. and sr. prefixes are not included in names. This contributes to skaters with the exact same names, which raises a new question, what players with the exact same name have found the most success. For example, there are 2 players named Sebastian Aho who are not related at all, and they will be compared to all other players who have the exact same name as another player. These are some of the trends and coincidences we will explore.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>has_sib <span class="sc">|&gt;</span> <span class="fu">slice</span>(<span class="dv">1</span>, <span class="dv">15</span>, <span class="dv">25</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         player start_year end_year position  GP  G   A PTS plus_minus PIM
+1  George Allen       1939     1947     LW/D 340 82 115 197         NA 181
+2 Morgan Barron       2021     2026        C 321 41  42  83         22 111
+3   Jim Benning       1982     1990        D 605 52 191 243        -77 461
+  even_str_G pp_G sh_G gw_G even_str_A pp_A sh_A shots_on_goal shooting_pct
+1         66   14    2   15         95   20    0            NA           NA
+2         36    0    5    7         38    2    2           426          9.6
+3         29   21    2    5         98   91    2           799          6.5
+   TOI     ATOI  OPS  DPS   PS  X Country  family id  sib
+1   NA     &lt;NA&gt; 13.2 14.5 27.7 33  Canada   Allen 33 sib1
+2 3701 11:32:00  1.7  5.3  7.0 39  Canada  Barron 39 sib1
+3   NA     &lt;NA&gt;  9.0 26.9 35.9 44  Canada Benning 44 sib1</code></pre>
+</div>
+</div>
 </section>
 <section id="which-siblings-are-the-most-successful" class="level2">
 <h2 class="anchored" data-anchor-id="which-siblings-are-the-most-successful">Which siblings are the most successful?</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>g_a_sib <span class="ot">&lt;-</span> has_sib <span class="sc">|&gt;</span> <span class="fu">group_by</span>(family, id) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">tot_G =</span> <span class="fu">sum</span>(G), <span class="at">tot_A =</span> <span class="fu">sum</span>(A))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>top_ten <span class="ot">&lt;-</span> has_sib <span class="sc">|&gt;</span> <span class="fu">group_by</span>(id, family) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">tot_G =</span> <span class="fu">sum</span>(G), <span class="at">tot_A =</span> <span class="fu">sum</span>(A)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(tot_A)) <span class="sc">|&gt;</span> <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> g_a_sib, <span class="fu">aes</span>(<span class="at">x =</span> tot_G, <span class="at">y =</span> tot_A)) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> tot_G)) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> top_ten, <span class="fu">aes</span>(<span class="at">label =</span> family)) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Total Goals&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Total Assists&quot;</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Sibling Pair&#39;s Total Goals and Assists&quot;</span>, </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;Total Goals&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2224,6 +2304,18 @@ vertical-align: -.125em;
 <section id="gretzky-and-sutter-siblings" class="level2">
 <h2 class="anchored" data-anchor-id="gretzky-and-sutter-siblings">Gretzky and Sutter Siblings</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gretzky <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">filter</span>(family <span class="sc">==</span> <span class="st">&quot;Gretzky&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">tot_G =</span> G, <span class="at">tot_A =</span> A, <span class="at">tot_GP =</span> GP, <span class="at">tot_PIM =</span> PIM)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>sutter <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">filter</span>(family <span class="sc">==</span> <span class="st">&quot;Sutter&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">tot_G =</span> G, <span class="at">tot_A =</span> A, <span class="at">tot_GP =</span> GP, <span class="at">tot_PIM =</span> PIM)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> g_a_sib, <span class="fu">aes</span>(<span class="at">x =</span> tot_G, <span class="at">y =</span> tot_A)) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> tot_G)) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> gretzky, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> sutter, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Total goals&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Total Goals&quot;</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Sutter and Gretzky Family Total Goals and Assists&quot;</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;Total Goals&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2237,6 +2329,19 @@ vertical-align: -.125em;
 <section id="most-penalty-minutes" class="level2">
 <h2 class="anchored" data-anchor-id="most-penalty-minutes">Most Penalty Minutes</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pim_sib <span class="ot">&lt;-</span> has_sib <span class="sc">|&gt;</span> <span class="fu">group_by</span>(id, family) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">tot_PIM =</span> <span class="fu">sum</span>(PIM), <span class="at">tot_GP =</span> <span class="fu">sum</span>(GP)) </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>top_pim <span class="ot">&lt;-</span> has_sib <span class="sc">|&gt;</span> <span class="fu">group_by</span>(family) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">tot_PIM =</span> <span class="fu">sum</span>(PIM), <span class="at">tot_GP =</span> <span class="fu">sum</span>(GP)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(tot_PIM)) <span class="sc">|&gt;</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> pim_sib, <span class="fu">aes</span>(<span class="at">x =</span> tot_GP, <span class="at">y =</span> tot_PIM)) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> tot_PIM)) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> top_pim, <span class="fu">aes</span>(<span class="at">label =</span> family)) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Total Games Played&quot;</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Total Penalty Minutes&quot;</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Siblings with the Most Penalty Minutes&quot;</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;Total Penalty Minutes&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2250,6 +2355,19 @@ vertical-align: -.125em;
 <section id="which-of-these-siblings-is-the-most-violent" class="level2">
 <h2 class="anchored" data-anchor-id="which-of-these-siblings-is-the-most-violent">Which of these siblings is the most violent?</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>hunter <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">filter</span>(family <span class="sc">==</span> <span class="st">&quot;Hunter&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">tot_GP =</span> GP, <span class="at">tot_PIM =</span> PIM)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> pim_sib, <span class="fu">aes</span>(<span class="at">x =</span> tot_GP, <span class="at">y =</span> tot_PIM)) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> tot_PIM)) <span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> hunter, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> sutter, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> gretzky, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Total Games Played&quot;</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Total Penalty Minutes&quot;</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;Total Penalty Minutes&quot;</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Sutter, Hunter, and Gretzky Brothers Penalty Minutes&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2263,6 +2381,22 @@ vertical-align: -.125em;
 <section id="per-player-siblings-vs.-non-siblings-statistics" class="level2">
 <h2 class="anchored" data-anchor-id="per-player-siblings-vs.-non-siblings-statistics">Per-Player Siblings vs. Non-Siblings Statistics</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sib_comp_per_player <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sib_ind =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(id), <span class="st">&quot;Sib&quot;</span>, <span class="st">&quot;No Sib&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sib_ind) <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(PIM)) <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(plus_minus)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="st">&quot;Games Played&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(GP)<span class="sc">/</span><span class="fu">n</span>(),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Goals =</span> <span class="fu">sum</span>(G)<span class="sc">/</span><span class="fu">n</span>(), </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Assists =</span> <span class="fu">sum</span>(A)<span class="sc">/</span><span class="fu">n</span>(), </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Points =</span> <span class="fu">sum</span>(PTS)<span class="sc">/</span><span class="fu">n</span>(),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">PIM =</span> <span class="fu">sum</span>(PIM)<span class="sc">/</span><span class="fu">n</span>(),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Plus Minus&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(plus_minus)<span class="sc">/</span><span class="fu">n</span>()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">Games Played</span><span class="st">`</span>, Goals, Assists, Points, PIM, <span class="st">`</span><span class="at">Plus Minus</span><span class="st">`</span>))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> sib_comp_per_player, <span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> value, <span class="at">fill =</span> sib_ind)) <span class="sc">+</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">&quot;dodge&quot;</span>) <span class="sc">+</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Statistic&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count Per Player&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;Sibling Status&quot;</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Comparing Siblings vs Non-Siblings by averaging per-player Statistics&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2276,6 +2410,21 @@ vertical-align: -.125em;
 <section id="per-game-siblings-vs.-non-siblings-statistics" class="level2">
 <h2 class="anchored" data-anchor-id="per-game-siblings-vs.-non-siblings-statistics">Per-Game Siblings vs. Non-Siblings Statistics</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sib_comp_per_game <span class="ot">&lt;-</span> skaters_wsib <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sib_ind =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(id), <span class="st">&quot;Sib&quot;</span>, <span class="st">&quot;No Sib&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sib_ind) <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(PIM)) <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(plus_minus)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">Goals =</span> <span class="fu">sum</span>(G)<span class="sc">/</span><span class="fu">sum</span>(GP), </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Assists =</span> <span class="fu">sum</span>(A)<span class="sc">/</span><span class="fu">sum</span>(GP), </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Points =</span> <span class="fu">sum</span>(PTS)<span class="sc">/</span><span class="fu">sum</span>(GP),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">PIM =</span> <span class="fu">sum</span>(PIM)<span class="sc">/</span><span class="fu">sum</span>(GP),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(Goals, Assists, Points, PIM))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> sib_comp_per_game, <span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> value, <span class="at">fill =</span> sib_ind)) <span class="sc">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">&quot;dodge&quot;</span>) <span class="sc">+</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Statistic&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Per-Game Statistics&quot;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;Sibling Status&quot;</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Comparing Siblings vs. Non-Siblings with per-game Statistics&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2290,6 +2439,20 @@ vertical-align: -.125em;
 <h2 class="anchored" data-anchor-id="players-with-the-same-name">Players with the same name</h2>
 <p>During this project I stumbled on a collection of players who had the exact same name as other NHL players. Some of these are father-son pairs, with Jr. and Sr. prefixes not featured on Hockey Reference, while others just coincedentally have the same exact names. This next section will see which pair of players with the same name has been the most successful.</p>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>same_name <span class="ot">&lt;-</span> skaters <span class="sc">|&gt;</span> <span class="fu">group_by</span>(player) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">size =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> <span class="fu">filter</span>(size <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">plus_minus =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(plus_minus), plus_minus, <span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">G =</span> <span class="fu">sum</span>(G), <span class="at">A =</span> <span class="fu">sum</span>(A), <span class="at">GP =</span> <span class="fu">sum</span>(GP), <span class="at">PTS =</span> <span class="fu">sum</span>(PTS), </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">plus_minus =</span> <span class="fu">sum</span>(plus_minus), <span class="at">PIM =</span> <span class="fu">sum</span>(PIM))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>same_name_topg <span class="ot">&lt;-</span> same_name <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(G)) <span class="sc">|&gt;</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> same_name, <span class="fu">aes</span>(<span class="at">x =</span> GP, <span class="at">y =</span> G)) <span class="sc">+</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> G)) <span class="sc">+</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> same_name_topg, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Games Played&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Goals&quot;</span>, </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;Goals&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Goals Scored by Pairs with the Same Name&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2303,6 +2466,14 @@ vertical-align: -.125em;
 <section id="most-violent-players-with-the-same-name" class="level2">
 <h2 class="anchored" data-anchor-id="most-violent-players-with-the-same-name">Most Violent Players with the same name</h2>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>same_name_toppim <span class="ot">&lt;-</span> same_name <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(PIM)) <span class="sc">|&gt;</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> same_name, <span class="fu">aes</span>(<span class="at">x =</span> GP, <span class="at">y =</span> PIM)) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> PIM)) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(<span class="at">data =</span> same_name_toppim, <span class="fu">aes</span>(<span class="at">label =</span> player)) <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Games Player&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Penalty Minutes&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Penalty Minutes&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Penalty Minutes for Players with the Same Name&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

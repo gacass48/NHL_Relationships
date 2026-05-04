@@ -7,7 +7,6 @@ embed-resources: true
 ```{r}
 #| warning: false
 #| output: false
-#| echo: false
 library(tidyverse)
 library(readr)
 library(here)
@@ -46,12 +45,15 @@ GP: Game Played</br>
 
 To combine the data sets we do a left join which keeps all of the rows from our skater data while adding columns with family name and id for players who are in the sibling data. There are a few players who have the exact same name as others, especially fathers/sons, but for our most successful sibling pairs this is not an issue. Because of how the data is stored on our skater list, we cannot look at trends with fathers/sons as I initially planned because the jr. and sr. prefixes are not included in names. This contributes to skaters with the exact same names, which raises a new question, what players with the exact same name have found the most success. For example, there are 2 players named Sebastian Aho who are not related at all, and they will be compared to all other players who have the exact same name as another player. These are some of the trends and coincidences we will explore.
 
+```{r}
+has_sib |> slice(1, 15, 25)
+```
+
 
 ## Which siblings are the most successful?
 
 ```{r}
 #| warning: false
-#| echo: false
 g_a_sib <- has_sib |> group_by(family, id) |> summarise(tot_G = sum(G), tot_A = sum(A))
 
 top_ten <- has_sib |> group_by(id, family) |> summarise(tot_G = sum(G), tot_A = sum(A)) |> arrange(desc(tot_A)) |> ungroup() |> slice(1:10)
@@ -73,7 +75,6 @@ This plot shows the most successful sibling pairs in NHL history in terms of goa
 
 ```{r}
 #| warning: false
-#| echo: false
 gretzky <- skaters_wsib |> filter(family == "Gretzky") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
 sutter <- skaters_wsib |> filter(family == "Sutter") |> mutate(tot_G = G, tot_A = A, tot_GP = GP, tot_PIM = PIM)
 
@@ -95,7 +96,6 @@ From this plot we can see that these two families have very different collection
 
 ```{r}
 #| warning: false
-#| echo: false
 pim_sib <- has_sib |> group_by(id, family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) 
 
 top_pim <- has_sib |> group_by(family) |> summarise(tot_PIM = sum(PIM), tot_GP = sum(GP)) |> arrange(desc(tot_PIM)) |> slice(1:10)
@@ -117,7 +117,6 @@ This plot shows another side of siblings, instead of goals and assists we are lo
 
 ```{r}
 #| warning: false
-#| echo: false
 hunter <- skaters_wsib |> filter(family == "Hunter") |> mutate(tot_GP = GP, tot_PIM = PIM)
 
 ggplot(data = pim_sib, aes(x = tot_GP, y = tot_PIM)) +
@@ -139,7 +138,6 @@ On this plot we can see that Dale Hunter's brothers must have had a tough time g
 
 ```{r}
 #| warning: false
-#| echo: false
 sib_comp_per_player <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
     group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
     summarise("Games Played" = sum(GP)/n(),
@@ -165,7 +163,6 @@ This plot shows an overall comparison between players with and without siblings 
 
 ```{r}
 #| warning: false
-#| echo: false
 sib_comp_per_game <- skaters_wsib |> mutate(sib_ind = if_else(!is.na(id), "Sib", "No Sib")) |>
     group_by(sib_ind) |> filter(!is.na(PIM)) |> filter(!is.na(plus_minus)) |> 
     summarise(Goals = sum(G)/sum(GP), 
@@ -194,7 +191,6 @@ During this project I stumbled on a collection of players who had the exact same
 
 ```{r}
 #| warning: false
-#| echo: false
 same_name <- skaters |> group_by(player) |> mutate(size = n()) |> filter(size > 1) |>
     mutate(plus_minus = if_else(!is.na(plus_minus), plus_minus, 0, 0)) |>
     summarise(G = sum(G), A = sum(A), GP = sum(GP), PTS = sum(PTS), 
@@ -217,7 +213,6 @@ This plot shows the top performing pairs of people who have the same exact name.
 
 ```{r}
 #| warning: false
-#| echo: false
 same_name_toppim <- same_name |> arrange(desc(PIM)) |> slice(1:10)
 
 ggplot(data = same_name, aes(x = GP, y = PIM)) +
