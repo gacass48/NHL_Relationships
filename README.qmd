@@ -58,10 +58,16 @@ What is the best pair of players with the exact same name?
 
 ![](best_sib.png)
 
+This plot shows the most successful sibling pairs in NHL history in terms of goals and assists. We can see that while there are a lot of sibling pairs that have acheived impressive careers, the Sutter and Gretzky siblings clearly stand above the rest. Both of these families have impressive careers rivaling some of the best individuals in NHL history.
+
 ### Per Player Siblings vs. Non-Siblings
 
 ![](sib_non.png)
 
+This plot shows an overall comparison between players with and without siblings in the NHL, observing Statistics per-player. This plot represents 6318 players without siblings, and 520 players with siblings. Each bar represents the average statistics per-player for someone with or without a sibling. We can see that players with siblings play almost 100 more games, and outperform in all other satistics. A longer career usually indicates a better career, but also contributes to higher goal, assist, and point counts.
+
 ### Players with the Same Name
 
 ![](name.png)
+
+This plot shows the top performing pairs of people who have the same exact name. We see players like Syl Apps Sr. and Jr., the former which was one of the greatest Centers of all time. His son would later go on to play and have a solid NHL career as well. This is contrasted with players like Sebastian Aho, with 2 players from the 2000s-2010s and coming from different countries (Sweden and Finland). The top scoring pair, Greg Adams and Greg Adams, played 10 years apart and had no relation beside the same name. It was interesting to see a number of players who had no relation with solid success in the NHL.
