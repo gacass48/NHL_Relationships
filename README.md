@@ -25,10 +25,6 @@ G: Goals Scored</br> A: Assists</br> PTS: Points = Goals + Assists</br>
 PIM: Penalty Minutes</br> pm: Plus Minus = Team Goals Scored while on
 ice - Goals against while on ice</br> GP: Game Played</br>
 
-``` r
-has_sib |> slice(1, 15)
-```
-
              player start_year end_year position  GP  G   A PTS plus_minus PIM
     1  George Allen       1939     1947     LW/D 340 82 115 197         NA 181
     2 Morgan Barron       2021     2026        C 321 41  42  83         22 111

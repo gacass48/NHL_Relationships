@@ -38,6 +38,7 @@ no_sib <- skaters_wsib |> filter(is.na(id))
 ```
 
 ```{r}
+#| echo: false
 has_sib |> slice(1, 15)
 ```
 
